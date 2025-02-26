@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
+
 from cstr import cstr
+from disturbances import disturbances
 
 # time horizon
 T = 60
@@ -18,17 +20,19 @@ u = [300 for i in range(int(nsteps/4))] + \
     [302 for i in range(int(nsteps/4))]
 
 # disturbances
-d = np.c_[
-    np.array(
-        [1 for i in range(int(nsteps/3))] + \
-        [1.2 for i in range(int(nsteps/3))] + \
-        [1.1 for i in range(int(nsteps/3) + 1)]
-    ).reshape(-1, 1),
-    np.array(
-        [350 for i in range(int(nsteps/2))] + \
-        [340 for i in range(int(nsteps/2))]
-    ).reshape(-1, 1)
-]
+# d = np.c_[
+#     np.array(
+#         [1 for i in range(int(nsteps/3))] + \
+#         [1.2 for i in range(int(nsteps/3))] + \
+#         [1.1 for i in range(int(nsteps/3) + 1)]
+#     ).reshape(-1, 1),
+#     np.array(
+#         [350 for i in range(int(nsteps/2))] + \
+#         [340 for i in range(int(nsteps/2))]
+#     ).reshape(-1, 1)
+# ]
+disturbance_space = {"low": np.array([0.9, 340]), "high": np.array([1.1, 360])}
+d = disturbances(nsteps, disturbance_space)
 
 # simulate
 for i in range(nsteps - 1):
@@ -36,9 +40,9 @@ for i in range(nsteps - 1):
     x[i + 1] = odeint(cstr, x[i], ts, args=(u[i], d[i]))[-1]
 
     if x[i + 1][1] < 370:
-        u[i + 1] = 305
+        u[i + 1] = 310
     else:
-        u[i + 1] = 295
+        u[i + 1] = 290
     
 # plot disturbances
 f, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 3))
